@@ -39,10 +39,7 @@ This recipe uses nvidia/OpenMathInstruct2Dataset https://huggingface.co/datasets
 ## Docker container image
 
 This recipe uses the following docker image:
-`us-central1-docker.pkg.dev/deeplearning-images/reproducibility/pytorch-gpu-nemo-nccl:nemo-rl-nemo25.04`.
-
-This image is based on NVIDIA NeMo 25.04 and contains the NCCL gIB plugin
-v1.0.5, bundling all NCCL binaries validated for use with A4 GPUs.
+`nvcr.io/nvidia/nemo-rl:v0.4.0`
 
 ## Run the recipe
 
