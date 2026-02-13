@@ -46,7 +46,7 @@ export WANDB_API_KEY=$WANDB_API_KEY
 export HF_TOKEN=$HF_TOKEN
 export HF_HOME=/opt/nemo-rl/
 
-###-----Example to launch llama 3.1 8b on 4 nodes (32 GPUs)----------
+###-----Example to launch llama 3.1 8b on 2 nodes (16 GPUs)----------
 uv run python examples/run_grpo_math.py \
   --config examples/configs/grpo_math_8B.yaml \
   logger.wandb_enabled=True \
