@@ -353,6 +353,7 @@ root@ray-cluster-kuberay-worker-grp-0-worker-kdrxx:/opt/nemo-rl# tree /data/nemo
     `-- training_info.json
 
 6 directories, 39 files
+```
 
 ### Evaluating model against Math_500 dataset
 
@@ -397,7 +398,7 @@ Job submission complete.
 1 directory, 6 files
 ```
 
-### Evaluate using gemma_eval.sh
+### Evaluate Post trained Gemma3-27b-it
 
 Run the evaluation script to test the model's performance.
 
