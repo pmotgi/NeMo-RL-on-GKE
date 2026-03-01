@@ -354,6 +354,102 @@ root@ray-cluster-kuberay-worker-grp-0-worker-kdrxx:/opt/nemo-rl# tree /data/nemo
 
 6 directories, 39 files
 
+### Evaluating model against Math_500 dataset
+
+After training, you can evaluate the performance of your fine-tuned model. NeMo RL provides an evaluation script (`run_eval.py`) to assess model capabilities on various benchmarks. For math-related tasks, you can use a configuration like `https://docs.nvidia.com/nemo/rl/0.3.0/_downloads/1e3cc2a8bf30bd91bbf97b145fa976d6/eval.yaml` and datasets such as `math500`. The evaluation script calculates metrics like pass@k accuracy.
+
+The `gemma3-27b-eval.sh` script is a wrapper that simplifies this process.
+
+### Convert the pytorch DCP format to HF format
+
+Before evaluation, the PyTorch Distributed Checkpoint (DCP) needs to be converted to the Hugging Face (HF) format. [1, 2]
+
+```bash
+source gemma3-27b-format-dcp-hf.sh
+```
+
+**Sample Output:**
+```bash
++ export HF_HOME=/opt/nemo-rl/
++ HF_HOME=/opt/nemo-rl/
+Setting environment variables...
++ uv run python examples/converters/convert_dcp_to_hf.py --config /data/nemo_rl_gemma3_25b_2_27/step_10/config.yaml --dcp-ckpt-path /data/nemo_rl_gemma3_25b_2_27/step_10/policy/weights/ --hf-ckpt-path /data/gemma3-27b-s10-hf
+   Building nemo-rl @ file:///opt/nemo-rl
+      Built nemo-rl @ file:///opt/nemo-rl
+Uninstalled 1 package in 2ms
+Installed 1 package in 0.73ms
+Saved HF checkpoint to: /data/gemma3-27b-s10-hf
++ echo '--- Job Finished ---'
+--- Job Finished ---
+
+Job submission complete.
+
+
+/opt/nemo-rl# tree /data/gemma3-27b-s10-hf
+/data/gemma3-27b-s10-hf
+|-- chat_template.jinja
+|-- config.json
+|-- pytorch_model.bin
+|-- special_tokens_map.json
+|-- tokenizer.json
+`-- tokenizer_config.json
+
+1 directory, 6 files
+```
+
+### Evaluate using gemma_eval.sh
+
+Run the evaluation script to test the model's performance.
+
+```bash
+source gemma3-27b-eval.sh
+```
+
+**Sample Output:**
+```bash
+============================================================
+model_name='hf' dataset_name='math500'
+max_new_tokens=32768 temperature=0.6 top_p=1.0 top_k=-1 seed=42
+
+metric=pass@1 num_tests_per_prompt=16
+
+score=0.8949 (447.43750113248825/500)
+============================================================
+```
+
+### Serve the post-trained model using nvidia-vllm conatiner
+
+Once you are satisfied with the model's performance, you can deploy it for inference using a high-performance serving solution like vLLM.
+
+```bash
+kubectl apply -f nvidia-vllm-post-trained-gemma3-27-deploy.yaml
+```
+
+**Sample Output:**
+```bash
+service/llm-service created
+deployment.apps/gemma3-deploy created
+```
+
+### Test against hosted model
+
+After deploying the model, you can send requests to the service endpoint to test it.
+
+**Sample Output:**
+```bash
+kubectl port-forward service/llm-service 8000:8000
+
+curl http://localhost:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "/data/nemo_rl_gemma3_25b_2_27/hf2-28",
+        "messages": [
+            {"role": "user", "content": "whats a derivate?"}
+        ],
+        "max_tokens": 200,
+        "temperature": 0.7
+    }'
+
 ```
 
 
